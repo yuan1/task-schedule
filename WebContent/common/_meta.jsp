@@ -1,3 +1,4 @@
+<%@ page import="java.util.Date"%>
 <%
 	String path = request.getContextPath();
 String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path + "/";
@@ -9,5 +10,5 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 <meta name="viewport"
 	content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
-<link rel="stylesheet" href="static/css/style.css">
+<link rel="stylesheet" href="static/css/app.css?t=<%=new Date().getTime()%>">
 <%@ include file="/common/_util.jsp"%>

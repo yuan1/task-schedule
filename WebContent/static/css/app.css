@@ -1,0 +1,384 @@
+@charset "utf-8";
+
+/* global */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    min-width: 1200px;
+    min-height: 600px;
+    overflow: hidden;
+}
+
+body {
+    color: white;
+    position: relative;
+    font-family: "Microsoft Yahei", Arial, sans-serif;
+    background: #050d3c url("../img/bg.png") 0 0 / 100% 100% no-repeat;
+}
+
+/* layout */
+#header {
+    position: relative;
+    height: 72px;
+    background: url("../img/header.png") 0 0 / 100% 100% no-repeat;
+    overflow: hidden;
+}
+
+.header-title {
+    line-height: 64px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: 400;
+    color: #bef2ff;
+}
+
+#container {
+    position: absolute;
+    top: 64px;
+    bottom: 15px;
+    left: 0;
+    right: 0;
+}
+
+#flexCon {
+    height: 100%;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.flex-row {
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.flex-cell {
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    padding: 10px;
+}
+
+.flex-cell-l,
+.flex-cell-r {
+    -webkit-flex: 2;
+    -ms-flex: 2;
+    flex: 2;
+}
+
+.flex-cell-c {
+    -webkit-flex: 3;
+    -ms-flex: 3;
+    flex: 3;
+}
+
+.flex-cell-lc {
+    -webkit-flex: 5;
+    -ms-flex: 5;
+    flex: 5;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 100%;
+}
+
+.chart-title {
+    height: 30px;
+    font-size: 20px;
+    font-weight: normal;
+    color: #5ac8fa;
+}
+
+.chart-div {
+    position: absolute;
+    top: 30px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-style: solid;
+    border-width: 26px 27px 27px;
+    border-image: url("../img/chart-wrapper.png") 26 27 27 fill / 1 / 0 repeat;
+}
+
+/* media query */
+@media (max-width: 1900px) {
+    #header {
+        height: 48px;
+    }
+
+    #container {
+        top: 36px;
+        bottom: 10px;
+    }
+
+    .header-title {
+        line-height: 42px;
+        font-size: 22px;
+    }
+
+    .flex-cell {
+        padding: 5px;
+    }
+
+    .chart-title {
+        height: 24px;
+        font-size: 16px;
+    }
+
+    .chart-div {
+        top: 24px;
+    }
+}
+
+/* chart-loader */
+.chart-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0);
+    transition: all .8s;
+}
+
+.chart-loader .loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    border: 3px solid transparent;
+    border-top-color: #3498db;
+    border-radius: 50% !important;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+}
+
+.chart-loader .loader:before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border: 3px solid transparent;
+    border-top-color: #e74c3c;
+    border-radius: 50% !important;
+    -webkit-animation: spin 3s linear infinite;
+    animation: spin 3s linear infinite;
+}
+
+.chart-loader .loader:after {
+    content: "";
+    position: absolute;
+    top: 9px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 3px solid transparent;
+    border-top-color: #f9c922;
+    border-radius: 50% !important;
+    -webkit-animation: spin 1.5s linear infinite;
+    animation: spin 1.5s linear infinite;
+}
+
+.chart-done .chart-loader {
+    display: none;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
+}
+
+.computer-info {
+    color: #ffffff;
+}
+
+.computer-info h2 {
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+.computer-info p {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.progress-container,
+.progress-container .progress {
+    width: 100%;
+    height: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background-color: red;
+    background-image: linear-gradient(-90deg, red, green);
+}
+
+.progress-bar p {
+    height: 100%;
+    width: 30%;
+    background: #ffffff;
+    float: right;
+}
+
+.task-top {
+    display: flex;
+}
+
+.task-top .task-top-content {
+    flex: 1;
+    padding: 0 10px;
+}
+
+.task-top .task-top-content h2 {
+    font-size: 16px;
+}
+
+.task-top .task-top-content .task-top-progress {
+    position: relative;
+    margin: 16px 0;
+}
+
+.task-top .task-top-content .task-top-progress label {
+    font-size: 14px;
+    color: #0364db;
+    display: inline-block;
+    opacity: 0.6;
+    height: 24px;
+}
+
+.task-top .task-top-content .task-top-progress span {
+    font-size: 16px;
+    float: right;
+    display: inline-block;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    min-width: 50px;
+    height: 36px;
+    line-height: 36px;
+}
+
+table td {
+    text-align: center;
+    padding: 9px 0;
+}
+
+table tr:nth-child(2n) td {
+    background: rgba(89, 201, 250, 0.6);
+}
+
+table a {
+    text-decoration: unset;
+    color: white;
+}
+
+table a:hover {
+    color: red;
+}
+
+.task-manager {
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+}
+
+.task-log {
+    position: relative;
+    overflow-y: auto;
+    top: 15px;
+    height: 85px;
+    padding: 0 0 15px 0;
+}
+
+.task-log p {
+    font-size: 12px;
+}
+
+.computer-manager {
+    overflow-y: auto;
+    width: 100%;
+    height: calc(100% - 32px);
+}
+
+.manager-list {
+    display: flex;
+}
+
+.manager-list p {
+    min-width: 50px;
+    text-align: center;
+    height: 32px;
+    line-height: 32px;
+}
+
+.manager-list p a {
+    text-decoration: unset;
+    color: white;
+}
+
+.manager-list p a:hover {
+    color: red;
+}
+
+.computer-manager .manager-list:nth-child(odd) p,
+.task-manager .manager-list:nth-child(odd) p {
+    background: rgba(89, 201, 250, 0.6);
+}

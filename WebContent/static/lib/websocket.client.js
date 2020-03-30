@@ -20,7 +20,7 @@ class WebsocketClient {
             //
             this.webSocket.onopen = (event) => {
                 this.callback({
-                    type: 'onopen',
+                    action: 'onopen',
                     body: event
                 });
                 console.log('onopen::' + JSON.stringify(event, null, 4));
@@ -29,21 +29,21 @@ class WebsocketClient {
             this.webSocket.onmessage = (event) => {
                 var msg = event.data;
                 this.callback({
-                    type: 'onmessage',
+                    action: 'onmessage',
                     body: msg
                 });
                 console.log('onmessage::' + JSON.stringify(msg, null, 4));
             };
             this.webSocket.onclose = (event) => {
                 this.callback({
-                    type: 'onclose',
+                    action: 'onclose',
                     body: event
                 });
                 console.log('onclose::' + JSON.stringify(event, null, 4));
             };
             this.webSocket.onerror = (event) => {
                 this.callback({
-                    type: 'onerror',
+                    action: 'onerror',
                     body: event
                 });
                 console.log('onerror::' + JSON.stringify(event, null, 4));
