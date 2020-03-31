@@ -7,6 +7,11 @@
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
+	<listener>
+		<listener-class>
+			listener.ServletRequestListener
+		</listener-class>
+	</listener>
 	<error-page>
 		<error-code>400</error-code>
 		<location>/common/404.jsp</location>

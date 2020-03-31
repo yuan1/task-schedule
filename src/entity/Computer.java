@@ -5,8 +5,8 @@ public class Computer {
     private String name;
     private String cpu;
     private Long cpuUsage;
-    private String Memory;
-    private Long MemoryUsage;
+    private String memory;
+    private Long memoryUsage;
     private String disk;
     private Long diskUsage;
     private String network;
@@ -45,19 +45,19 @@ public class Computer {
     }
 
     public String getMemory() {
-        return Memory;
+        return memory;
     }
 
     public void setMemory(String memory) {
-        Memory = memory;
+        this.memory = memory;
     }
 
     public Long getMemoryUsage() {
-        return MemoryUsage;
+        return memoryUsage;
     }
 
     public void setMemoryUsage(Long memoryUsage) {
-        MemoryUsage = memoryUsage;
+        this.memoryUsage = memoryUsage;
     }
 
     public String getDisk() {
@@ -97,10 +97,10 @@ public class Computer {
         return "Computer{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", CPU='" + cpu + '\'' +
-                ", CPUUsage=" + cpuUsage +
-                ", Memory='" + Memory + '\'' +
-                ", MemoryUsage=" + MemoryUsage +
+                ", cpu='" + cpu + '\'' +
+                ", cpuUsage=" + cpuUsage +
+                ", memory='" + memory + '\'' +
+                ", memoryUsage=" + memoryUsage +
                 ", disk='" + disk + '\'' +
                 ", diskUsage=" + diskUsage +
                 ", network='" + network + '\'' +
