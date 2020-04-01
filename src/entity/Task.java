@@ -9,11 +9,21 @@ public class Task {
     private Long networkUsage;
     private Long timeUsage;
     private Long createTime;
+    private Long overTime; // 任务应该结束时间
+    private int stated; // 是否开始
     private int complete; // 是否完成
     private Long completeTime;
     private int computerId;
     private String computerName;
     private String status; // 状态
+
+    public int getStated() {
+        return stated;
+    }
+
+    public void setStated(int stated) {
+        this.stated = stated;
+    }
 
     public int getId() {
         return id;
@@ -119,6 +129,14 @@ public class Task {
         this.status = status;
     }
 
+    public Long getOverTime() {
+        return overTime;
+    }
+
+    public void setOverTime(Long overTime) {
+        this.overTime = overTime;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -130,6 +148,7 @@ public class Task {
                 ", networkUsage=" + networkUsage +
                 ", timeUsage=" + timeUsage +
                 ", createTime=" + createTime +
+                ", overTime=" + overTime +
                 ", complete=" + complete +
                 ", completeTime=" + completeTime +
                 ", computerId=" + computerId +

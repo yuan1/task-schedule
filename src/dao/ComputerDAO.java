@@ -82,13 +82,13 @@ public class ComputerDAO {
     }
 
     public Computer selectOne(int id) {
-        Computer computer =null;
+        Computer computer = null;
         connection = new DBHelper().getConn();
-        String sql ="select * from computer where id=?";
+        String sql = "select * from computer where id=?";
         try {
-            statement=connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql);
             statement.setInt(1, id);
-            set =statement.executeQuery();
+            set = statement.executeQuery();
             while (set.next()) {
                 computer = new Computer();
                 computer.setId(set.getInt("id"));
@@ -104,7 +104,7 @@ public class ComputerDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 set.close();
                 statement.close();
@@ -114,5 +114,37 @@ public class ComputerDAO {
             }
         }
         return computer;
+    }
+
+    public Boolean update(Computer computer) {
+        connection = new DBHelper().getConn();
+        String sql = "update computer set name=?,cpu=?,disk=?,memory=?,network=?,cpu_usage=?,disk_usage=?,memory_usage=?,network_usage=?  where id=?";    //使用?做占位符
+        try {
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, computer.getName());    //为第1个?号赋值
+            statement.setString(2, computer.getCpu());
+            statement.setString(3, computer.getDisk());
+            statement.setString(4, computer.getMemory());
+            statement.setString(5, computer.getNetwork());
+            statement.setLong(6, computer.getCpuUsage());
+            statement.setLong(7, computer.getDiskUsage());
+            statement.setLong(8, computer.getMemoryUsage());
+            statement.setLong(9, computer.getNetworkUsage());
+            statement.setLong(10, computer.getId());
+            int rs = statement.executeUpdate();    //执行并返回影响条数
+            if (rs > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 }

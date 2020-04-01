@@ -3,6 +3,7 @@ package service;
 import dao.TaskDAO;
 import entity.Task;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -18,13 +19,17 @@ public class TaskService {
     }
 
     public Boolean save(Task task) {
-        task.setCreateTime(new Date().getTime());
+        task.setCreateTime(Instant.now().getEpochSecond());
         task.setComputerName("");
+        task.setStated(0);
         task.setComplete(0);
         task.setComputerId(0);
         task.setCompleteTime(0L);
         task.setStatus("创建完成");
         return taskDAO.save(task);
+    }
+    public Boolean update(Task task) {
+        return taskDAO.update(task);
     }
 
 }

@@ -22,5 +22,8 @@ public class ComputerService {
         computer.setCpuUsage(0L);
         return computerDAO.save(computer);
     }
+    public Boolean update(Computer computer) {
+        return computerDAO.update(computer);
+    }
 
 }

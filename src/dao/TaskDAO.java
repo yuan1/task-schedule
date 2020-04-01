@@ -37,6 +37,7 @@ public class TaskDAO {
                 task.setComputerId(set.getInt("computer_id"));
                 task.setComputerName(set.getString("computer_name"));
                 task.setStatus(set.getString("status"));
+                task.setStated(set.getInt("started"));
                 taskList.add(task);    //封装对象添加到List中
             }
         } catch (SQLException e) {
@@ -55,7 +56,7 @@ public class TaskDAO {
 
     public boolean save(Task task) {
         connection = new DBHelper().getConn();
-        String sql = "insert into task(name,cpu_usage,disk_usage,memory_usage,network_usage,time_usage,create_time,complete_time,complete,computer_id,computer_name,status) values(?,?,?,?,?,?,?,?,?,?,?,?) ";    //使用?做占位符
+        String sql = "insert into task(name,cpu_usage,disk_usage,memory_usage,network_usage,time_usage,create_time,complete_time,complete,computer_id,computer_name,status,started) values(?,?,?,?,?,?,?,?,?,?,?,?,?) ";    //使用?做占位符
         try {
             statement = connection.prepareStatement(sql);
             statement.setString(1, task.getName());    //为第1个?号赋值
@@ -70,6 +71,7 @@ public class TaskDAO {
             statement.setInt(10, task.getComputerId());
             statement.setString(11, task.getComputerName());
             statement.setString(12, task.getStatus());
+            statement.setInt(13, task.getStated());
             int rs = statement.executeUpdate();    //执行并返回影响条数
             if (rs > 0) {
                 return true;
@@ -110,6 +112,7 @@ public class TaskDAO {
                 task.setComputerId(set.getInt("computer_id"));
                 task.setComputerName(set.getString("computer_name"));
                 task.setStatus(set.getString("status"));
+                task.setStated(set.getInt("started"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,5 +126,40 @@ public class TaskDAO {
             }
         }
         return task;
+    }
+
+    public Boolean update(Task task) {
+        connection = new DBHelper().getConn();
+        String sql = "update task set name=?,cpu_usage=?,disk_usage=?,memory_usage=?,network_usage=?,time_usage=?,complete_time=?,complete=?,computer_id=?,computer_name=?,status=?,started=? where id =? ";    //使用?做占位符
+        try {
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, task.getName());    //为第1个?号赋值
+            statement.setLong(2, task.getCpuUsage());
+            statement.setLong(3, task.getDiskUsage());
+            statement.setLong(4, task.getMemoryUsage());
+            statement.setLong(5, task.getNetworkUsage());
+            statement.setLong(6, task.getTimeUsage());
+            statement.setLong(7, task.getCompleteTime());
+            statement.setInt(8, task.getComplete());
+            statement.setInt(9, task.getComputerId());
+            statement.setString(10, task.getComputerName());
+            statement.setString(11, task.getStatus());
+            statement.setInt(12, task.getStated());
+            statement.setInt(13, task.getId());
+            int rs = statement.executeUpdate();    //执行并返回影响条数
+            if (rs > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 }
