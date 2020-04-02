@@ -30,10 +30,12 @@ window.onload = function () {
                 this.loadComputer()
             }
             if (action === 'addTask') {
-                this.addTaskResult(body)
+                this.addTaskResult(body);
+                this.loadTaskCount();
             }
             if (action === 'deleteTask') {
-                this.loadTask()
+                this.loadTask();
+                this.loadTaskCount();
             }
             if (action === 'selectComputerById') {
                 this.showComputerOneResult(body)
@@ -112,8 +114,9 @@ function initCpuTop5(data) {
     });
     // 只显示前8
     way.set("computer.cpuTopList", list.slice(0, 8));
-
-    this.initProgress('task-cpu-top')
+    setTimeout(() => {
+        this.initProgress('task-cpu-top')
+    }, 1000)
 }
 
 // 对计算机进行按照内存占用率排序
@@ -125,7 +128,9 @@ function initMemoryTop5(data) {
     // 只显示前8
     way.set("computer.memoryTopList", list.slice(0, 8));
 
-    this.initProgress('task-memory-top')
+    setTimeout(() => {
+        this.initProgress('task-memory-top')
+    }, 1000)
 }
 
 // 对计算机进行按照硬盘占用率排序
@@ -137,7 +142,9 @@ function initDiskTop5(data) {
     // 只显示前8
     way.set("computer.diskTopList", list.slice(0, 8));
 
-    this.initProgress('task-disk-top')
+    setTimeout(() => {
+        this.initProgress('task-disk-top')
+    }, 1000)
 }
 
 // 对计算机进行按照带宽占用率排序
@@ -148,17 +155,20 @@ function initNetworkTop5(data) {
     });
     // 只显示前8
     way.set("computer.networkTopList", list.slice(0, 8));
-
-    this.initProgress('task-network-top')
+    setTimeout(() => {
+        this.initProgress('task-network-top')
+    }, 1000)
 }
 
 // 设置进度条
 function initProgress(id) {
     for (let i = 0; i < 8; i++) {
         const div = document.getElementById(id + '-' + i);
-        const num = div.innerHTML;
-        const percent = 100 - Number(num);
-        div.style.width = percent + '%'
+        if (div) {
+            const num = div.innerHTML || 0;
+            const percent = 100 - Number(num);
+            div.style.width = percent + '%'
+        }
     }
 }
 

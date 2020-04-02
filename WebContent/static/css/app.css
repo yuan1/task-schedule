@@ -273,7 +273,7 @@ a {
 
 .progress-bar p {
     height: 100%;
-    width: 0;
+    width: 100%;
     background: #ffffff;
     float: right;
     transition: width .1s;
