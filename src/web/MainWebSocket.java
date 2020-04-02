@@ -1,11 +1,13 @@
 package web;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import entity.Computer;
 import entity.Task;
 import service.ComputerService;
 import service.TaskService;
+import util.TaskUtil;
 import util.WebSocketSession;
 
 import javax.websocket.OnClose;
@@ -15,6 +17,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.List;
+import java.util.Map;
 
 @ServerEndpoint("/endpoint")
 public class MainWebSocket {
@@ -57,6 +60,19 @@ public class MainWebSocket {
             String result = WebSocketSession.buildResponse(action, true, tasks);
             WebSocketSession.sendMsgById(session.getId(), result);
         }
+        if (action.equals("loadTaskCount")) {
+            Map<String, Long> map = taskService.countTask();
+            JSONObject res = new JSONObject();
+            res.put("x1", map.keySet());
+            res.put("y1", map.values());
+            Map<String, Long> map1 = taskService.countTaskComplete();
+            res.put("x2", map1.keySet());
+            res.put("y2", map1.values());
+
+
+            String result = WebSocketSession.buildResponse(action, true, res);
+            WebSocketSession.sendMsgById(session.getId(), result);
+        }
         if (action.equals("selectComputerById")) {
             Integer id = jsonObject.getInteger("data");
             Computer computer = computerService.selectOne(id);
@@ -74,6 +90,9 @@ public class MainWebSocket {
             Boolean res = computerService.save(computer);
             String result = WebSocketSession.buildResponse(action, res);
             WebSocketSession.sendMsgById(session.getId(), result);
+
+            // 新分配计算机资源 检查等待的任务
+            TaskUtil.checkWaitedTask();
         }
         if (action.equals("addTask")) {
             JSONObject data = jsonObject.getJSONObject("data");
@@ -85,6 +104,33 @@ public class MainWebSocket {
             task.setNetworkUsage(data.getLong("networkUsage"));
             task.setTimeUsage(data.getLong("timeUsage"));
             Boolean res = taskService.save(task);
+            String result = WebSocketSession.buildResponse(action, res);
+            WebSocketSession.sendMsgById(session.getId(), result);
+
+            // 开始新任务
+            TaskUtil.startTask(task);
+        }
+        if (action.equals("deleteTask")) {
+            Integer id = jsonObject.getInteger("data");
+            Task task = taskService.selectOne(id);
+            if (task == null) {
+                return;
+            }
+            // 删除任务相关
+            TaskUtil.deleteTask(task);
+            Boolean res = taskService.delete(id);
+            String result = WebSocketSession.buildResponse(action, res);
+            WebSocketSession.sendMsgById(session.getId(), result);
+        }
+        if (action.equals("deleteComputer")) {
+            Integer id = jsonObject.getInteger("data");
+            Computer computer = computerService.selectOne(id);
+            if (computer == null) {
+                return;
+            }
+            // 删除任务相关
+            TaskUtil.deleteComputer(computer);
+            Boolean res = computerService.delete(id);
             String result = WebSocketSession.buildResponse(action, res);
             WebSocketSession.sendMsgById(session.getId(), result);
         }

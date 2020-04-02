@@ -18,7 +18,7 @@ public class ComputerDAO {
     public List<Computer> selectAll() {
         List<Computer> computerList = new ArrayList<>();
         connection = new DBHelper().getConn();
-        String sql = "select * from computer"; //定义SQL语句
+        String sql = "select * from computer order by id desc"; //定义SQL语句
         try {
             statement = connection.prepareStatement(sql);
             set = statement.executeQuery();    //执行SQL语句并取得结果集
@@ -147,4 +147,28 @@ public class ComputerDAO {
         }
         return false;
     }
+
+    public boolean delete(int id) {
+        connection = new DBHelper().getConn();
+        String sql = "delete from computer where id=?";
+        try {
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            int rs = statement.executeUpdate();
+            if (rs > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
 }

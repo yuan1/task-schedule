@@ -61,7 +61,7 @@
                             <p style="width: 50px">内存</p>
                             <p style="width: 50px">硬盘</p>
                             <p style="width: 50px">带宽</p>
-                            <p style="width: 100px">操作</p>
+                            <p style="width: 50px">操作</p>
                         </div>
                         <div class="computer-manager" id="computer-manager">
                             <div class="chart-loader">
@@ -73,8 +73,8 @@
                                 <p way-data="memory" style="width: 50px"></p>
                                 <p way-data="disk" style="width: 50px"></p>
                                 <p way-data="network" style="width: 50px"></p>
-                                <p style="width: 100px">
-                                    <a href="#">任务</a>丨 <a href="#">删除</a>
+                                <p style="width: 50px">
+                                    <a href="javascript:;" onclick="doDeleteComputer($$key)">删除</a>
                                 </p>
                             </div>
                         </div>
@@ -127,10 +127,15 @@
             </div>
             <div class="flex-cell flex-cell-r">
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">任务管理<a href="javascript:;" onclick="showAddTaskDialog()">+</a></h3>
+                    <h3 class="chart-title">任务管理 <a href="javascript:;" onclick="showAddTaskDialog()">+</a></h3>
                     <div class="chart-div">
                         <div class="manager-list">
                             <p style="flex: 1">名称</p>
+                            <p style="width: 50px">CPU</p>
+                            <p style="width: 50px">内存</p>
+                            <p style="width: 50px">硬盘</p>
+                            <p style="width: 50px">带宽</p>
+                            <p style="width: 100px">计算机</p>
                             <p style="width: 100px">状态</p>
                             <p style="width: 50px">操作</p>
                         </div>
@@ -140,9 +145,14 @@
                             </div>
                             <div way-repeat="task.list" class="manager-list">
                                 <p way-data="name" style="flex: 1"></p>
+                                <p way-data="cpuUsage" style="width: 50px"></p>
+                                <p way-data="memoryUsage" style="width: 50px"></p>
+                                <p way-data="diskUsage" style="width: 50px"></p>
+                                <p way-data="networkUsage" style="width: 50px"></p>
+                                <p way-data="computerName" style="width: 100px"></p>
                                 <p way-data="status" style="width: 100px"></p>
                                 <p style="width: 50px">
-                                    <a href="#">删除</a>
+                                    <a href="javascript:;" onclick="doDeleteTask($$key)">删除</a>
                                 </p>
                             </div>
                         </div>

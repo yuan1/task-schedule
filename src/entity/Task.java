@@ -11,11 +11,29 @@ public class Task {
     private Long createTime;
     private Long overTime; // 任务应该结束时间
     private int stated; // 是否开始
+    private int waited; // 是否等待
     private int complete; // 是否完成
     private Long completeTime;
     private int computerId;
     private String computerName;
     private String status; // 状态
+    private Long startedTime;
+
+    public int getWaited() {
+        return waited;
+    }
+
+    public void setWaited(int waited) {
+        this.waited = waited;
+    }
+
+    public Long getStartedTime() {
+        return startedTime;
+    }
+
+    public void setStartedTime(Long startedTime) {
+        this.startedTime = startedTime;
+    }
 
     public int getStated() {
         return stated;
@@ -149,11 +167,14 @@ public class Task {
                 ", timeUsage=" + timeUsage +
                 ", createTime=" + createTime +
                 ", overTime=" + overTime +
+                ", stated=" + stated +
+                ", waited=" + waited +
                 ", complete=" + complete +
                 ", completeTime=" + completeTime +
                 ", computerId=" + computerId +
                 ", computerName='" + computerName + '\'' +
                 ", status='" + status + '\'' +
+                ", startedTime=" + startedTime +
                 '}';
     }
 }
