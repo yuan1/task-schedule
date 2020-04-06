@@ -86,8 +86,8 @@ public class TaskService {
         // 获取三十天前
         Instant before30 = Instant.now().minus(30, ChronoUnit.DAYS);
 
-        List<Task> completeTasks = tasks.stream().filter(task -> {
-            Instant taskTime = Instant.ofEpochSecond(task.getCompleteTime());
+        List<Task> createdTasks = tasks.stream().filter(task -> {
+            Instant taskTime = Instant.ofEpochSecond(task.getCreateTime());
             return taskTime.isAfter(before30);
         }).collect(Collectors.toList());
 
@@ -97,8 +97,8 @@ public class TaskService {
             String date = formatter.format(before);
             map.put(date, 0L);
         }
-        completeTasks.forEach(task -> {
-            String date = formatter.format(Instant.ofEpochSecond(task.getCompleteTime()));
+        createdTasks.forEach(task -> {
+            String date = formatter.format(Instant.ofEpochSecond(task.getCreateTime()));
             Long old = map.get(date);
             if (old == null) {
                 old = 0L;

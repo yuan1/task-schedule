@@ -1,31 +1,50 @@
 package util;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
  * 数据库工具
- *
  */
 public class DBHelper {
-	private String dbUrl = "jdbc:mysql://123.206.18.117:3309/task-schedule?useUnicode=true&characterEncoding=utf8";
-	private String dbUser = "root";
-	private String dbPassword = "1371271347";
-	private String jdbcName = "com.mysql.jdbc.Driver";
+    private static ComboPooledDataSource dataSource = new ComboPooledDataSource();
 
-	public Connection getConn() {
-		Connection conn = null;
-		try {
-			Class.forName(jdbcName);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		try {
-			conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		}
-		return conn;
-	}
+    /**
+     * 获得数据源（连接池）
+     *
+     * @return
+     */
+    public static ComboPooledDataSource getDataSource() {
+        return dataSource;
+    }
+
+    /**
+     * 获得连接
+     *
+     * @return
+     */
+    public static Connection getConn() {
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    /**
+     * 归还连接
+     *
+     * @param conn
+     */
+    public static void closeConn(Connection conn) {
+        try {
+            if (conn != null && conn.isClosed()) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

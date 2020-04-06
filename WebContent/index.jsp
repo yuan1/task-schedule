@@ -227,8 +227,16 @@
                     <input type="text" id="task_network" name="networkUsage">
                 </div>
                 <div class="form-item is-required">
-                    <label for="task_time">时长(分钟)：</label>
+                    <label for="task_time">时长(秒)：</label>
                     <input type="text" id="task_time" name="timeUsage">
+                </div>
+                <div class="form-item is-required">
+                    <label for="task_count">任务数量：</label>
+                    <input type="text" id="task_count" name="count">
+                </div>
+                <div class="form-item is-required">
+                    <label for="task_count_interval">任务间隔(秒)：</label>
+                    <input type="text" id="task_count_interval" name="countInterval">
                 </div>
             </form>
         </div>

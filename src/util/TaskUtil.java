@@ -66,7 +66,7 @@ public class TaskUtil {
         // 获取当前时间
         Instant now = Instant.now();
         // 加任务时长，获得结束时间
-        Instant taskOver = now.plusSeconds(time * 60);
+        Instant taskOver = now.plusSeconds(time);
 
         // 设置任务信息
         task.setStartedTime(now.getEpochSecond());
@@ -102,8 +102,8 @@ public class TaskUtil {
 
     public static void initTimer() {
         Timer timer = new Timer();
-        // 每分钟 检查
-        timer.schedule(new TaskTimer(), 0, 60 * 1000);
+        // 每秒钟 检查
+        timer.schedule(new TaskTimer(), 0, 1 * 1000);
     }
 
     // 每分钟 检查 任务是否执行完毕

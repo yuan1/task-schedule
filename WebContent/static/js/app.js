@@ -15,10 +15,12 @@ window.onload = function () {
             const body = JSON.parse(res.body);
             const {action} = body;
             if (action === 'loadComputer') {
-                this.loadComputerResult(body)
+                this.loadComputerResult(body);
+                this.loadTaskCount();
             }
             if (action === 'loadTask') {
-                this.loadTaskResult(body)
+                this.loadTaskResult(body);
+                this.loadTaskCount();
             }
             if (action === 'loadTaskCount') {
                 this.loadTaskCountResult(body)
@@ -241,14 +243,23 @@ function doDeleteComputer(index) {
 function showAddTaskDialog() {
     const computerDialog = document.getElementById('task-dialog');
     if (computerDialog) {
+        way.set("task.form", {
+            cpuUsage: 10,
+            memoryUsage: 10,
+            diskUsage: 10,
+            networkUsage: 10,
+            timeUsage: 10,
+            count: 1,
+            countInterval: 1,
+        });
         computerDialog.style.display = 'block'
     }
+
 }
 
 function doAddTask() {
     const formData = way.get("task.form");
-    console.log(formData);
-    if (!formData || !formData.name || !formData.cpuUsage || !formData.memoryUsage || !formData.diskUsage || !formData.networkUsage || !formData.timeUsage) {
+    if (!formData || !formData.name || !formData.cpuUsage || !formData.memoryUsage || !formData.diskUsage || !formData.networkUsage || !formData.timeUsage || !formData.count || !formData.countInterval) {
         alert("必填项不可为空");
         return;
     }

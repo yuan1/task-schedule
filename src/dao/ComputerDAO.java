@@ -17,7 +17,7 @@ public class ComputerDAO {
 
     public List<Computer> selectAll() {
         List<Computer> computerList = new ArrayList<>();
-        connection = new DBHelper().getConn();
+        connection = DBHelper.getConn();
         String sql = "select * from computer order by id desc"; //定义SQL语句
         try {
             statement = connection.prepareStatement(sql);
@@ -51,7 +51,7 @@ public class ComputerDAO {
     }
 
     public boolean save(Computer computer) {
-        connection = new DBHelper().getConn();
+        connection =  DBHelper.getConn();
         String sql = "insert into computer(name,cpu,disk,memory,network,cpu_usage,disk_usage,memory_usage,network_usage) values(?,?,?,?,?,?,?,?,?) ";    //使用?做占位符
         try {
             statement = connection.prepareStatement(sql);
@@ -83,7 +83,7 @@ public class ComputerDAO {
 
     public Computer selectOne(int id) {
         Computer computer = null;
-        connection = new DBHelper().getConn();
+        connection =  DBHelper.getConn();
         String sql = "select * from computer where id=?";
         try {
             statement = connection.prepareStatement(sql);
@@ -117,7 +117,7 @@ public class ComputerDAO {
     }
 
     public Boolean update(Computer computer) {
-        connection = new DBHelper().getConn();
+        connection =  DBHelper.getConn();
         String sql = "update computer set name=?,cpu=?,disk=?,memory=?,network=?,cpu_usage=?,disk_usage=?,memory_usage=?,network_usage=?  where id=?";    //使用?做占位符
         try {
             statement = connection.prepareStatement(sql);
@@ -149,7 +149,7 @@ public class ComputerDAO {
     }
 
     public boolean delete(int id) {
-        connection = new DBHelper().getConn();
+        connection =  DBHelper.getConn();
         String sql = "delete from computer where id=?";
         try {
             statement = connection.prepareStatement(sql);

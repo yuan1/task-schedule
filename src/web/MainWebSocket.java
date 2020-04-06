@@ -96,19 +96,30 @@ public class MainWebSocket {
         }
         if (action.equals("addTask")) {
             JSONObject data = jsonObject.getJSONObject("data");
-            Task task = new Task();
-            task.setName(data.getString("name"));
-            task.setCpuUsage(data.getLong("cpuUsage"));
-            task.setMemoryUsage(data.getLong("memoryUsage"));
-            task.setDiskUsage(data.getLong("diskUsage"));
-            task.setNetworkUsage(data.getLong("networkUsage"));
-            task.setTimeUsage(data.getLong("timeUsage"));
-            Boolean res = taskService.save(task);
-            String result = WebSocketSession.buildResponse(action, res);
-            WebSocketSession.sendMsgById(session.getId(), result);
+            // 批量添加
+            Long count = data.getLong("count");
+            Long countInterval = data.getLong("countInterval");
+            Long timeUsage = data.getLong("timeUsage");
+            for (int i = 0; i < count; i++) {
+                Task task = new Task();
+                String name = data.getString("name");
+                if (i > 0) {
+                    name = name + "_" + i;
+                }
+                task.setName(name);
+                task.setCpuUsage(data.getLong("cpuUsage"));
+                task.setMemoryUsage(data.getLong("memoryUsage"));
+                task.setDiskUsage(data.getLong("diskUsage"));
+                task.setNetworkUsage(data.getLong("networkUsage"));
+                task.setTimeUsage(timeUsage);
+                taskService.save(task);
+                // 开始新任务
+                TaskUtil.startTask(task);
+                timeUsage += countInterval;
+            }
 
-            // 开始新任务
-            TaskUtil.startTask(task);
+            String result = WebSocketSession.buildResponse(action, true);
+            WebSocketSession.sendMsgById(session.getId(), result);
         }
         if (action.equals("deleteTask")) {
             Integer id = jsonObject.getInteger("data");
