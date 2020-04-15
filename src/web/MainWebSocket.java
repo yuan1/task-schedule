@@ -18,6 +18,7 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @ServerEndpoint("/endpoint")
 public class MainWebSocket {
@@ -49,6 +50,20 @@ public class MainWebSocket {
         String action = jsonObject.getString("action");
         if (action == null) {
             return;
+        }
+        if (action.equals("setTaskCanStart")) {
+            Boolean can = jsonObject.getBoolean("data");
+            String res = "";
+            if (can && TaskUtil.canStart) {
+                res = "任务执行已经开始";
+            } else if (!can && !TaskUtil.canStart) {
+                res = "任务执行已经停止";
+            } else {
+                TaskUtil.setCanStart(can);
+                res = "任务执行" + (can ? "开始" : "停止") + "成功";
+            }
+            String result = WebSocketSession.buildResponse(action, true, res);
+            WebSocketSession.sendMsgById(session.getId(), result);
         }
         if (action.equals("loadComputer")) {
             List<Computer> computers = computerService.selectAll();
@@ -103,14 +118,23 @@ public class MainWebSocket {
             for (int i = 0; i < count; i++) {
                 Task task = new Task();
                 String name = data.getString("name");
+                Long cpuUsage=data.getLong("cpuUsage");
+                Long memoryUsage=data.getLong("memoryUsage");
+                Long diskUsage=data.getLong("diskUsage");
+                Long networkUsage=data.getLong("networkUsage");
                 if (i > 0) {
                     name = name + "_" + i;
+                    // 批量任务随机
+                    cpuUsage=(long) (new Random().nextInt(100) + 1);
+                    memoryUsage=(long) (new Random().nextInt(100) + 1);
+                    diskUsage=(long) (new Random().nextInt(100) + 1);
+                    networkUsage=(long) (new Random().nextInt(100) + 1);
                 }
                 task.setName(name);
-                task.setCpuUsage(data.getLong("cpuUsage"));
-                task.setMemoryUsage(data.getLong("memoryUsage"));
-                task.setDiskUsage(data.getLong("diskUsage"));
-                task.setNetworkUsage(data.getLong("networkUsage"));
+                task.setCpuUsage(cpuUsage);
+                task.setMemoryUsage(memoryUsage);
+                task.setDiskUsage(diskUsage);
+                task.setNetworkUsage(networkUsage);
                 task.setTimeUsage(timeUsage);
                 taskService.save(task);
                 // 开始新任务

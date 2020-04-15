@@ -18,7 +18,8 @@ public class ServletRequestListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
         System.out.println("init");//在这个方法里进行所需要的操作
-        TaskUtil.initStartedTask();
+        TaskUtil.initComputer();
+        TaskUtil.initTask();
         TaskUtil.initTimer();
     }
 }

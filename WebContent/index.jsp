@@ -127,7 +127,9 @@
             </div>
             <div class="flex-cell flex-cell-r">
                 <div class="chart-wrapper">
-                    <h3 class="chart-title">任务管理 <a href="javascript:;" onclick="showAddTaskDialog()">+</a></h3>
+                    <h3 class="chart-title">任务管理 <a href="javascript:;" onclick="showAddTaskDialog()">+</a>
+                        <span style="font-size: 12px;position: absolute;right: 10px;top: 2px;display: block"><a href="javascript:;" onclick="setTaskCanStart(true)">开始任务执行</a> 丨<a href="javascript:;"  onclick="setTaskCanStart(false)">停止任务执行</a></span>
+                    </h3>
                     <div class="chart-div">
                         <div class="manager-list">
                             <p style="flex: 1">名称</p>

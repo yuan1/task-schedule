@@ -3,10 +3,7 @@ package dao;
 import entity.Task;
 import util.DBHelper;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,7 +100,7 @@ public class TaskDAO {
         connection =  DBHelper.getConn();
         String sql = "insert into task(name,cpu_usage,disk_usage,memory_usage,network_usage,time_usage,create_time,complete_time,complete,computer_id,computer_name,status,started,started_time,waited,over_time) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";    //使用?做占位符
         try {
-            statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, task.getName());    //为第1个?号赋值
             statement.setLong(2, task.getCpuUsage());
             statement.setLong(3, task.getDiskUsage());

@@ -1,7 +1,7 @@
 package util;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -9,17 +9,16 @@ import java.sql.SQLException;
  * 数据库工具
  */
 public class DBHelper {
-    private static ComboPooledDataSource dataSource = new ComboPooledDataSource();
-
-    /**
-     * 获得数据源（连接池）
-     *
-     * @return
-     */
-    public static ComboPooledDataSource getDataSource() {
-        return dataSource;
+    // 静态数据源变量，供全局操作且用于静态代码块加载资源。
+    private static  DruidDataSource dataSource = new DruidDataSource();
+    static {
+        //2,为数据库添加配置文件
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://123.206.18.117:3309/task-schedule?characterEncoding=utf-8");
+        dataSource.setUsername("root");
+        dataSource.setPassword("1371271347");
+        dataSource.setMaxActive(50);
     }
-
     /**
      * 获得连接
      *
@@ -30,21 +29,6 @@ public class DBHelper {
             return dataSource.getConnection();
         } catch (SQLException e) {
             throw new RuntimeException();
-        }
-    }
-
-    /**
-     * 归还连接
-     *
-     * @param conn
-     */
-    public static void closeConn(Connection conn) {
-        try {
-            if (conn != null && conn.isClosed()) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 }

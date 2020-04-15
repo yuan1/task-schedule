@@ -42,11 +42,29 @@ window.onload = function () {
             if (action === 'selectComputerById') {
                 this.showComputerOneResult(body)
             }
+            if (action === 'setTaskCanStart') {
+                this.setTaskCanStartResult(body)
+            }
         }
     });
     client.connect();
     window.client = client;
 };
+
+function setTaskCanStart(val) {
+    const request = {
+        action: 'setTaskCanStart',
+        data: val
+    };
+    client.send(JSON.stringify(request));
+}
+
+function setTaskCanStartResult(res) {
+    const {msg} = res;
+    if (msg) {
+        alert(msg);
+    }
+}
 
 function loadTaskCount() {
     const request = {

@@ -16,13 +16,17 @@ public class TaskUtil {
     // 等待中的任务（计算机资源未找到）
     private static List<Task> waitedTask = new ArrayList<>();
 
-
+    public static Boolean canStart=false;
     /**
      * 开始一个任务
      *
      * @param task 任务信息
      */
     public static boolean startTask(Task task) {
+        if(!canStart){
+            System.out.println("task start to await " + task.getName());
+            return true;
+        }
         System.out.println("start task " + task.getName());
         ComputerService computerService = new ComputerService();
         // 根据任务 获取 对应可用的计算机资源
@@ -87,6 +91,20 @@ public class TaskUtil {
         return true;
     }
 
+    /**
+     * 设置任务可以开始
+     * @param val 是否可以
+     */
+    public static void setCanStart(Boolean val){
+        canStart=val;
+        if(canStart){
+            TaskService taskService = new TaskService();
+            List<Task> tasks = taskService.selectAll();
+            // 过滤数组 获取 没开始执行的任务
+            tasks.stream().filter(task -> task.getStated()==0 && task.getComplete()==0).forEach(TaskUtil::startTask);
+        }
+    }
+
     private static void updateSession() {
         System.out.println("update session to page all");
         ComputerService computerService = new ComputerService();
@@ -121,8 +139,8 @@ public class TaskUtil {
 
     }
 
-    public static void initStartedTask() {
-        System.out.println("init started task by db");
+    public static void initTask() {
+        System.out.println("init task by db");
         TaskService taskService = new TaskService();
         List<Task> tasks = taskService.selectAll();
         // 过滤数组 获取 开始的任务
@@ -139,6 +157,22 @@ public class TaskUtil {
         // 过滤数组 获取 等待中的任务
         // 开始等待的任务
         tasks.stream().filter(task -> (task.getWaited() == 1)).forEach(TaskUtil::startTask);
+    }
+
+    public static void initComputer() {
+        System.out.println("init computer");
+        ComputerService computerService =new ComputerService();
+        List<Computer> computers = computerService.selectAll();
+        computers.forEach(computer -> {
+            // 重置不是0 的计算机
+            if(!(computer.getCpuUsage()==0&& computer.getDiskUsage()==0&& computer.getMemoryUsage()==0&& computer.getNetworkUsage()==0)){
+                computer.setCpuUsage(0L);
+                computer.setNetworkUsage(0L);
+                computer.setMemoryUsage(0L);
+                computer.setDiskUsage(0L);
+                computerService.update(computer);
+            }
+        });
     }
 
     private static void setTaskOver(Task task, Instant overTime) {
