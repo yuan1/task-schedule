@@ -6,32 +6,37 @@ import service.ComputerService;
 import service.TaskService;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class TaskUtil {
+    // 储存所有数据库加载任务
+    public static Map<Integer, Task> taskMap = new HashMap<>();
+    // 储存所有数据库加载计算机
+    public static Map<Integer, Computer> computerMap = new HashMap<>();
     // 存储已经开始的任务
     private static Map<Integer, Task> startedTask = new HashMap<>();
-
     // 等待中的任务（计算机资源未找到）
-    private static List<Task> waitedTask = new ArrayList<>();
+    private static Map<Integer, Task> waitedTask = new HashMap<>();
 
-    public static Boolean canStart=false;
+    public static Boolean canStart = false;
+
     /**
      * 开始一个任务
      *
      * @param task 任务信息
      */
     public static boolean startTask(Task task) {
-        if(!canStart){
+        if (!canStart) {
             System.out.println("task start to await " + task.getName());
             return true;
         }
         System.out.println("start task " + task.getName());
-        ComputerService computerService = new ComputerService();
         // 根据任务 获取 对应可用的计算机资源
-        List<Computer> allComputer = computerService.selectAll();
-        List<Computer> canUseComputer = allComputer.stream().filter(computer -> {
+        List<Computer> canUseComputer = getComputers().stream().filter(computer -> {
             // 可用 CPU资源
             long canUseCpu = 100 - computer.getCpuUsage();
             // 可用 内存资源
@@ -44,26 +49,29 @@ public class TaskUtil {
             return canUseCpu >= task.getCpuUsage() && canUseNetwork >= task.getNetworkUsage() && canUseMemory >= task.getMemoryUsage() && canUseDisk >= task.getDiskUsage();
         }).collect(Collectors.toList());
 
-        TaskService taskService = new TaskService();
         if (canUseComputer.size() == 0) {
             System.out.println("not find can use computer");
             task.setStatus("等待中");
             task.setStated(0);
             task.setWaited(1);
-            taskService.update(task);
-            waitedTask.add(task);
+            // 先删除 再添加 执行更新操作
+            removeTaskFromMap(task.getId());
+            taskMap.put(task.getId(), task);
+
+            waitedTask.put(task.getId(), task);
             return false;
         }
 
         Computer computer = canUseComputer.get(0);
-
+        System.out.println("find can use computer" + computer.getId());
         // 设置计算机 占用
         computer.setCpuUsage(computer.getCpuUsage() + task.getCpuUsage());
         computer.setNetworkUsage(computer.getNetworkUsage() + task.getNetworkUsage());
         computer.setDiskUsage(computer.getDiskUsage() + task.getDiskUsage());
         computer.setMemoryUsage(computer.getMemoryUsage() + task.getMemoryUsage());
-
-        computerService.update(computer);
+        // 先删除 再添加 执行更新操作
+        removeComputerFromMap(computer.getId());
+        computerMap.put(computer.getId(), computer);
 
         // 获取任务时长 (分钟)
         Long time = task.getTimeUsage();
@@ -81,7 +89,9 @@ public class TaskUtil {
         task.setComputerId(computer.getId());
         task.setComputerName(computer.getName());
         task.setWaited(0);
-        taskService.update(task);
+        // 先删除 再添加 执行更新操作
+        removeTaskFromMap(task.getId());
+        taskMap.put(task.getId(), task);
 
         System.out.println("task " + task.getName() + " is started in computer " + computer.getName());
         // 存储该任务
@@ -93,28 +103,22 @@ public class TaskUtil {
 
     /**
      * 设置任务可以开始
+     *
      * @param val 是否可以
      */
-    public static void setCanStart(Boolean val){
-        canStart=val;
-        if(canStart){
-            TaskService taskService = new TaskService();
-            List<Task> tasks = taskService.selectAll();
+    public static void setCanStart(Boolean val) {
+        canStart = val;
+        if (canStart) {
             // 过滤数组 获取 没开始执行的任务
-            tasks.stream().filter(task -> task.getStated()==0 && task.getComplete()==0).forEach(TaskUtil::startTask);
+            getTasks().stream().filter(task -> task.getStated() == 0 && task.getComplete() == 0).forEach(TaskUtil::startTask);
         }
     }
 
     private static void updateSession() {
         System.out.println("update session to page all");
-        ComputerService computerService = new ComputerService();
-        List<Computer> computers = computerService.selectAll();
-        String result = WebSocketSession.buildResponse("loadComputer", true, computers);
+        String result = WebSocketSession.buildResponse("loadComputer", true, getComputers());
         WebSocketSession.sendMsgToAll(result);
-
-        TaskService taskService = new TaskService();
-        List<Task> tasks = taskService.selectAll();
-        String result1 = WebSocketSession.buildResponse("loadTask", true, tasks);
+        String result1 = WebSocketSession.buildResponse("loadTask", true,getTasks());
         WebSocketSession.sendMsgToAll(result1);
     }
 
@@ -128,66 +132,74 @@ public class TaskUtil {
     public static void checkTaskIsOver() {
         System.out.println("check task is over");
         Instant now = Instant.now();
-        List<Task> list = new ArrayList<>(startedTask.values());
-        list.forEach(task -> {
+        List<Task> tasks = new ArrayList<>(startedTask.values());
+        tasks.forEach(task -> {
             Instant taskOver = Instant.ofEpochSecond(task.getOverTime());
             if (taskOver.isBefore(now)) {
                 setTaskOver(task, taskOver);
-                startedTask.remove(task.getId());
+                //startedTask.remove(ele);    //出错 修改了映射结构 影响了迭代器遍历
+                //用迭代器删除 则不会出错
+                System.out.println("task is over now remove task on [startedTask]");
+                startedTask.keySet().removeIf(ele -> ele == task.getId());
             }
         });
-
     }
 
     public static void initTask() {
         System.out.println("init task by db");
         TaskService taskService = new TaskService();
         List<Task> tasks = taskService.selectAll();
-        // 过滤数组 获取 开始的任务
-        tasks.stream().filter(task -> (task.getStated() == 1 && task.getComplete() == 0)).forEach(task -> {
-            // 获取任务应该结束的时间
-            Instant taskOver = Instant.ofEpochSecond(task.getOverTime());
-            // 结束时间在当前时间之前 表示该任务已经结束
-            if (taskOver.isBefore(Instant.now())) {
-                setTaskOver(task, taskOver);
-            } else {
-                startedTask.put(task.getId(), task);
+        tasks.forEach(task -> {
+            // 储存到内存
+            taskMap.put(task.getId(), task);
+            //获取 开始的任务
+            if (task.getStated() == 1 && task.getComplete() == 0) {
+                // 获取任务应该结束的时间
+                Instant taskOver = Instant.ofEpochSecond(task.getOverTime());
+                // 结束时间在当前时间之前 表示该任务已经结束
+                if (taskOver.isBefore(Instant.now())) {
+                    setTaskOver(task, taskOver);
+                } else {
+                    startedTask.put(task.getId(), task);
+                }
+            }
+            //获取 等待中的任务
+            if (task.getWaited() == 1) {
+                // 开始等待的任务
+                startTask(task);
             }
         });
-        // 过滤数组 获取 等待中的任务
-        // 开始等待的任务
-        tasks.stream().filter(task -> (task.getWaited() == 1)).forEach(TaskUtil::startTask);
     }
 
     public static void initComputer() {
         System.out.println("init computer");
-        ComputerService computerService =new ComputerService();
+        ComputerService computerService = new ComputerService();
         List<Computer> computers = computerService.selectAll();
         computers.forEach(computer -> {
             // 重置不是0 的计算机
-            if(!(computer.getCpuUsage()==0&& computer.getDiskUsage()==0&& computer.getMemoryUsage()==0&& computer.getNetworkUsage()==0)){
-                computer.setCpuUsage(0L);
-                computer.setNetworkUsage(0L);
-                computer.setMemoryUsage(0L);
-                computer.setDiskUsage(0L);
-                computerService.update(computer);
-            }
+            computer.setCpuUsage(0L);
+            computer.setNetworkUsage(0L);
+            computer.setMemoryUsage(0L);
+            computer.setDiskUsage(0L);
+            // 储存到内存
+            computerMap.put(computer.getId(), computer);
         });
     }
 
     private static void setTaskOver(Task task, Instant overTime) {
         System.out.println("task " + task.getName() + " is to set over");
-        TaskService taskService = new TaskService();
         task.setComplete(1);
         task.setStated(0);
         task.setWaited(0);
         task.setStatus("执行完毕");
         task.setCompleteTime(overTime.getEpochSecond());
-        taskService.update(task);
+        // 先删除 再添加 执行更新操作
+        removeTaskFromMap(task.getId());
+        taskMap.put(task.getId(), task);
 
-        ComputerService computerService = new ComputerService();
-        Computer computer = computerService.selectOne(task.getComputerId());
+        Computer computer = computerMap.get(task.getComputerId());
         if (computer == null) {
+            System.out.println("not found computer on [setTaskOver] in "+task.getName());
             return;
         }
         // 解除该任务的计算机 占用
@@ -195,7 +207,21 @@ public class TaskUtil {
         computer.setNetworkUsage(computer.getNetworkUsage() - task.getNetworkUsage());
         computer.setDiskUsage(computer.getDiskUsage() - task.getDiskUsage());
         computer.setMemoryUsage(computer.getMemoryUsage() - task.getMemoryUsage());
-        computerService.update(computer);
+        if(computer.getCpuUsage()<0){
+            computer.setCpuUsage(0L);
+        }
+        if(computer.getNetworkUsage()<0){
+            computer.setNetworkUsage(0L);
+        }
+        if(computer.getDiskUsage()<0){
+            computer.setDiskUsage(0L);
+        }
+        if(computer.getMemoryUsage()<0){
+            computer.setMemoryUsage(0L);
+        }
+        // 先删除 再添加 执行更新操作
+        removeComputerFromMap(computer.getId());
+        computerMap.put(computer.getId(), computer);
         // 更新页面显示
         updateSession();
 
@@ -205,34 +231,140 @@ public class TaskUtil {
 
     public static void checkWaitedTask() {
         System.out.println("check waited task");
-        if (waitedTask.size() > 0) {
-            Task task1 = waitedTask.get(0);
+        System.out.println(waitedTask);
+        List<Task> tasks = new ArrayList<>(waitedTask.values());
+        if (tasks.size() > 0) {
+            Task task1 = tasks.get(0);
             boolean res = startTask(task1);
             if (res) {
                 System.out.println("task " + task1.getName() + " is started now delete from [Started Failed Task]");
-                waitedTask.remove(0);
+//                waitedTask.remove(0);
+                waitedTask.keySet().removeIf(ele -> ele == task1.getId());
             }
         }
     }
 
     public static void deleteTask(Task task) {
-        if (task.getComplete() == 1) {
-            return;
-        }
         if (task.getWaited() == 1) {
-            waitedTask.remove(task);
+//            waitedTask.remove(task);
+            waitedTask.keySet().removeIf(ele -> ele == task.getId());
         }
         if (task.getStated() == 1) {
-            startedTask.remove(task.getId());
+//            startedTask.remove(task.getId());
+            startedTask.keySet().removeIf(ele -> ele == task.getId());
         }
-        setTaskOver(task, Instant.now());
+        if (task.getComplete() == 0) {
+            setTaskOver(task, Instant.now());
+        }
+        // 删除内存中存储的
+        removeTaskFromMap(task.getId());
     }
 
     public static void deleteComputer(Computer computer) {
-        TaskService taskService = new TaskService();
-        List<Task> taskList = taskService.selectAllNotCompleteByComputerId(computer.getId());
         // 结束任务
-        taskList.forEach(TaskUtil::deleteTask);
+        getTasks().stream().filter(task -> task.getComplete() == 0 && task.getComputerId() == computer.getId()).forEach(TaskUtil::deleteTask);
+        // 删除内存中存储的
+        removeComputerFromMap(computer.getId());
+    }
+
+    public static Map<String, Long> countTaskComplete() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
+
+        // 获取七天前
+        Instant before7 = Instant.now().minus(7, ChronoUnit.DAYS);
+
+        List<Task> completeTasks = getTasks().stream().filter(task -> task.getComplete() == 1).filter(task -> {
+            Instant taskTime = Instant.ofEpochSecond(task.getCompleteTime());
+            return taskTime.isAfter(before7);
+        }).collect(Collectors.toList());
+
+        Map<String, Long> map = new TreeMap<>(Comparator.reverseOrder());
+        for (int i = 0; i < 7; i++) {
+            Instant before = Instant.now().minus(i, ChronoUnit.DAYS);
+            String date = formatter.format(before);
+            map.put(date, 0L);
+        }
+        completeTasks.forEach(task -> {
+            String date = formatter.format(Instant.ofEpochSecond(task.getCompleteTime()));
+            Long old = map.get(date);
+            if (old == null) {
+                old = 0L;
+            }
+            map.put(date, old + 1);
+        });
+        System.out.println("count task complete is " + map);
+        return map;
+    }
+
+    public static Map<String, Long> countTask() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
+
+        // 获取三十天前
+        Instant before30 = Instant.now().minus(30, ChronoUnit.DAYS);
+
+        List<Task> createdTasks = getTasks().stream().filter(task -> {
+            Instant taskTime = Instant.ofEpochSecond(task.getCreateTime());
+            return taskTime.isAfter(before30);
+        }).collect(Collectors.toList());
+
+        Map<String, Long> map = new TreeMap<>(Comparator.reverseOrder());
+        for (int i = 0; i < 30; i++) {
+            Instant before = Instant.now().minus(i, ChronoUnit.DAYS);
+            String date = formatter.format(before);
+            map.put(date, 0L);
+        }
+        createdTasks.forEach(task -> {
+            String date = formatter.format(Instant.ofEpochSecond(task.getCreateTime()));
+            Long old = map.get(date);
+            if (old == null) {
+                old = 0L;
+            }
+            map.put(date, old + 1);
+        });
+        System.out.println("count task is " + map);
+        return map;
+    }
+
+    public static void saveTask(Task task) {
+        taskMap.put(task.getId(), task);
+    }
+
+    public static void saveComputer(Computer computer) {
+        computerMap.put(computer.getId(), computer);
+    }
+
+    public static void updateAll() {
+
+        TaskService taskService = new TaskService();
+        // 异步更新所有
+        getTasks().forEach(taskService::update);
+
+        ComputerService computerService = new ComputerService();
+        // 异步更新所有
+        getComputers().forEach(computerService::update);
+    }
+    public static List<Task> getTasks(){
+        System.out.println("get all tasks map is "+taskMap);
+        return new ArrayList<>(taskMap.values());
+    }
+    public static List<Computer> getComputers(){
+        System.out.println("get all computer map is "+computerMap);
+        return new ArrayList<>(computerMap.values());
+    }
+
+    private static void removeTaskFromMap(int id){
+        taskMap.keySet().removeIf(ele -> ele == id);
+    }
+    private static void removeComputerFromMap(int id){
+        computerMap.keySet().removeIf(ele -> ele == id);
+    }
+
+    public static void deleteTaskCompleted() {
+        getTasks().forEach(task -> {
+            if(task.getComplete()==1){
+                removeTaskFromMap(task.getId());
+            }
+        });
     }
 }
 

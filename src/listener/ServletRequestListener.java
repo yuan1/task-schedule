@@ -12,7 +12,8 @@ public class ServletRequestListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent event) {
         // TODO Auto-generated method stub
-
+        System.out.println("destroyed");
+        TaskUtil.updateAll();
     }
 
     @Override

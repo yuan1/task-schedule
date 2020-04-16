@@ -120,6 +120,7 @@ a {
     bottom: 0;
     left: 0;
     right: 0;
+    overflow: hidden;
     border-style: solid;
     border-width: 26px 27px 27px;
     border-image: url("../img/chart-wrapper.png") 26 27 27 fill / 1 / 0 repeat;
@@ -340,6 +341,7 @@ table a:hover {
 }
 
 .task-manager {
+    overflow-x: hidden;
     overflow-y: auto;
     width: 100%;
     height: calc(100% - 32px);

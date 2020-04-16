@@ -16,6 +16,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -66,21 +67,19 @@ public class MainWebSocket {
             WebSocketSession.sendMsgById(session.getId(), result);
         }
         if (action.equals("loadComputer")) {
-            List<Computer> computers = computerService.selectAll();
-            String result = WebSocketSession.buildResponse(action, true, computers);
+            String result = WebSocketSession.buildResponse(action, true, TaskUtil.getComputers());
             WebSocketSession.sendMsgById(session.getId(), result);
         }
         if (action.equals("loadTask")) {
-            List<Task> tasks = taskService.selectAll();
-            String result = WebSocketSession.buildResponse(action, true, tasks);
+            String result = WebSocketSession.buildResponse(action, true, TaskUtil.getTasks());
             WebSocketSession.sendMsgById(session.getId(), result);
         }
         if (action.equals("loadTaskCount")) {
-            Map<String, Long> map = taskService.countTask();
+            Map<String, Long> map = TaskUtil.countTask();
             JSONObject res = new JSONObject();
             res.put("x1", map.keySet());
             res.put("y1", map.values());
-            Map<String, Long> map1 = taskService.countTaskComplete();
+            Map<String, Long> map1 = TaskUtil.countTaskComplete();
             res.put("x2", map1.keySet());
             res.put("y2", map1.values());
 
@@ -90,7 +89,7 @@ public class MainWebSocket {
         }
         if (action.equals("selectComputerById")) {
             Integer id = jsonObject.getInteger("data");
-            Computer computer = computerService.selectOne(id);
+            Computer computer = TaskUtil.computerMap.get(id);
             String result = WebSocketSession.buildResponse(action, true, computer);
             WebSocketSession.sendMsgById(session.getId(), result);
         }
@@ -102,8 +101,9 @@ public class MainWebSocket {
             computer.setMemory(data.getString("memory"));
             computer.setNetwork(data.getString("network"));
             computer.setDisk(data.getString("disk"));
-            Boolean res = computerService.save(computer);
-            String result = WebSocketSession.buildResponse(action, res);
+            computerService.save(computer);
+            TaskUtil.saveComputer(computer);
+            String result = WebSocketSession.buildResponse(action, true);
             WebSocketSession.sendMsgById(session.getId(), result);
 
             // 新分配计算机资源 检查等待的任务
@@ -115,20 +115,21 @@ public class MainWebSocket {
             Long count = data.getLong("count");
             Long countInterval = data.getLong("countInterval");
             Long timeUsage = data.getLong("timeUsage");
+            List<Task> tasks = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 Task task = new Task();
                 String name = data.getString("name");
-                Long cpuUsage=data.getLong("cpuUsage");
-                Long memoryUsage=data.getLong("memoryUsage");
-                Long diskUsage=data.getLong("diskUsage");
-                Long networkUsage=data.getLong("networkUsage");
+                Long cpuUsage = data.getLong("cpuUsage");
+                Long memoryUsage = data.getLong("memoryUsage");
+                Long diskUsage = data.getLong("diskUsage");
+                Long networkUsage = data.getLong("networkUsage");
                 if (i > 0) {
                     name = name + "_" + i;
                     // 批量任务随机
-                    cpuUsage=(long) (new Random().nextInt(100) + 1);
-                    memoryUsage=(long) (new Random().nextInt(100) + 1);
-                    diskUsage=(long) (new Random().nextInt(100) + 1);
-                    networkUsage=(long) (new Random().nextInt(100) + 1);
+                    cpuUsage = (long) (new Random().nextInt(100) + 1);
+                    memoryUsage = (long) (new Random().nextInt(100) + 1);
+                    diskUsage = (long) (new Random().nextInt(100) + 1);
+                    networkUsage = (long) (new Random().nextInt(100) + 1);
                 }
                 task.setName(name);
                 task.setCpuUsage(cpuUsage);
@@ -137,11 +138,23 @@ public class MainWebSocket {
                 task.setNetworkUsage(networkUsage);
                 task.setTimeUsage(timeUsage);
                 taskService.save(task);
-                // 开始新任务
-                TaskUtil.startTask(task);
+                tasks.add(task);
                 timeUsage += countInterval;
             }
 
+            tasks.forEach(task -> {
+                TaskUtil.saveTask(task);
+                // 开始新任务
+                TaskUtil.startTask(task);
+            });
+
+            String result = WebSocketSession.buildResponse(action, true);
+            WebSocketSession.sendMsgById(session.getId(), result);
+        }
+        if (action.equals("clearOverTask")) {
+            // 删除任务相关
+            TaskUtil.deleteTaskCompleted();
+            taskService.deleteCompleted();
             String result = WebSocketSession.buildResponse(action, true);
             WebSocketSession.sendMsgById(session.getId(), result);
         }

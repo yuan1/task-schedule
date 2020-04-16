@@ -32,7 +32,6 @@ class WebsocketClient {
                     action: 'onmessage',
                     body: msg
                 });
-                console.log('onmessage::' + JSON.stringify(msg, null, 4));
             };
             this.webSocket.onclose = (event) => {
                 this.callback({

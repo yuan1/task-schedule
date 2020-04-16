@@ -23,10 +23,12 @@ public class WebSocketSession {
 
     public static void sendMsgToAll(String data) {
         sessions.values().forEach(session -> {
-            try {
-                session.getBasicRemote().sendText(data);
-            } catch (IOException e) {
-                e.printStackTrace();
+            synchronized (session) {
+                try {
+                    session.getBasicRemote().sendText(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -37,14 +39,16 @@ public class WebSocketSession {
             System.out.println("not found session " + id);
             return;
         }
-        try {
-            session.getBasicRemote().sendText(data);
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (session) {
+            try {
+                session.getBasicRemote().sendText(data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public static String buildResponse(String action ,Boolean isSuccess, String msg, Object data) {
+    public static String buildResponse(String action, Boolean isSuccess, String msg, Object data) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("action", action);
         jsonObject.put("success", isSuccess);
@@ -53,7 +57,7 @@ public class WebSocketSession {
         return jsonObject.toJSONString();
     }
 
-    public static String buildResponse(String action ,Boolean isSuccess, String msg) {
+    public static String buildResponse(String action, Boolean isSuccess, String msg) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("action", action);
         jsonObject.put("success", isSuccess);
@@ -62,7 +66,7 @@ public class WebSocketSession {
         return jsonObject.toJSONString();
     }
 
-    public static String buildResponse(String action ,Boolean isSuccess, Object data) {
+    public static String buildResponse(String action, Boolean isSuccess, Object data) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("action", action);
         jsonObject.put("success", isSuccess);
@@ -71,7 +75,7 @@ public class WebSocketSession {
         return jsonObject.toJSONString();
     }
 
-    public static String buildResponse(String action ,Boolean isSuccess) {
+    public static String buildResponse(String action, Boolean isSuccess) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("action", action);
         jsonObject.put("success", isSuccess);

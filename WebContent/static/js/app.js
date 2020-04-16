@@ -8,7 +8,7 @@ window.onload = function () {
             this.loadTaskCount();
         }
         if (res.action === 'onclose') {
-            alert('服务端出现错误！');
+            alert('服务端停止运行！');
             window.location.reload();
         }
         if (res.action === 'onmessage') {
@@ -32,7 +32,7 @@ window.onload = function () {
                 this.loadComputer()
             }
             if (action === 'addTask') {
-                this.addTaskResult(body);
+                this.loadTask();
                 this.loadTaskCount();
             }
             if (action === 'deleteTask') {
@@ -45,12 +45,22 @@ window.onload = function () {
             if (action === 'setTaskCanStart') {
                 this.setTaskCanStartResult(body)
             }
+            if (action === 'clearOverTask') {
+                this.loadTask();
+                this.loadTaskCount();
+            }
+
         }
     });
     client.connect();
     window.client = client;
 };
-
+function clearOverTask() {
+    const request = {
+        action: 'clearOverTask'
+    };
+    client.send(JSON.stringify(request));
+}
 function setTaskCanStart(val) {
     const request = {
         action: 'setTaskCanStart',
@@ -136,7 +146,7 @@ function initCpuTop5(data) {
     way.set("computer.cpuTopList", list.slice(0, 8));
     setTimeout(() => {
         this.initProgress('task-cpu-top')
-    }, 1000)
+    }, 500)
 }
 
 // 对计算机进行按照内存占用率排序
@@ -150,7 +160,7 @@ function initMemoryTop5(data) {
 
     setTimeout(() => {
         this.initProgress('task-memory-top')
-    }, 1000)
+    }, 500)
 }
 
 // 对计算机进行按照硬盘占用率排序
@@ -164,7 +174,7 @@ function initDiskTop5(data) {
 
     setTimeout(() => {
         this.initProgress('task-disk-top')
-    }, 1000)
+    }, 500)
 }
 
 // 对计算机进行按照带宽占用率排序
@@ -177,7 +187,7 @@ function initNetworkTop5(data) {
     way.set("computer.networkTopList", list.slice(0, 8));
     setTimeout(() => {
         this.initProgress('task-network-top')
-    }, 1000)
+    }, 500)
 }
 
 // 设置进度条
@@ -206,7 +216,10 @@ function loadTaskResult(res) {
         console.error(msg);
         return;
     }
-    way.set("task.list", data);
+    const list = data.sort((a, b) => {
+        return b.id-a.id
+    });
+    way.set("task.list", list);
     hideLoad('task-manager')
 }
 
@@ -287,20 +300,10 @@ function doAddTask() {
         data: formData
     };
     client.send(JSON.stringify(request));
-}
-
-function addTaskResult(res) {
     hideLoad('task-dialog');
-    const {success} = res;
-    if (!success) {
-        alert('添加失败！');
-        return;
-    }
     way.remove("task.form");
     closeDialog();
-    loadTask();
 }
-
 function doDeleteTask(index) {
     const tasks = way.get("task.list") || [];
     const task = tasks[index];
@@ -463,22 +466,27 @@ function initComputerStatus() {
         radius: '50%',
         axisLine: {
             lineStyle: {
-                width: '6'
+                width: '1'
             }
         },
         splitLine: {
-            length: '6'
+            length: '2'
         },
         pointer: {
             width: '2',
-            length: '60%'
+            length: '50%'
         },
         axisTick: {
             show: false
         },
+        axisLabel:{
+            show: true,
+            distance:0,
+            fontSize:10
+        },
         title: {
             textStyle: {
-                fontSize: 12,
+                fontSize: 10,
                 color: '#ffffff'
             },
             offsetCenter: ['0', '70%'],
@@ -499,25 +507,25 @@ function initComputerStatus() {
                 name: 'CPU',
                 center: ['25%', '25%'],
                 ...initOption,
-                data: [{value: 40, name: 'CPU占用率'}]
+                data: [{value: 0, name: 'CPU占用率'}]
             },
             {
                 name: '内存',
                 center: ['80%', '25%'],
                 ...initOption,
-                data: [{value: 14, name: '内存占用率'}]
+                data: [{value: 0, name: '内存占用率'}]
             },
             {
                 name: '硬盘',
                 center: ['25%', '80%'],
                 ...initOption,
-                data: [{value: 5, name: '硬盘占用率'}]
+                data: [{value: 0, name: '硬盘占用率'}]
             },
             {
                 name: '带宽',
                 center: ['80%', '80%'],
                 ...initOption,
-                data: [{value: 10, name: '带宽占用率'}]
+                data: [{value: 0, name: '带宽占用率'}]
             }
         ]
     };

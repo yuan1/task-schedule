@@ -14,7 +14,7 @@ public class TaskDAO {
 
     public List<Task> selectAll() {
         List<Task> taskList = new ArrayList<>();
-        connection =  DBHelper.getConn();
+        connection = DBHelper.getConn();
         String sql = "select * from task order by create_time desc "; //定义SQL语句
         try {
             statement = connection.prepareStatement(sql);
@@ -53,9 +53,10 @@ public class TaskDAO {
         }
         return taskList;
     }
+
     public List<Task> selectAllNotCompleteByComputerId(int id) {
         List<Task> taskList = new ArrayList<>();
-        connection =  DBHelper.getConn();
+        connection = DBHelper.getConn();
         String sql = "select * from task where computer_id=? and complete=0 order by create_time desc "; //定义SQL语句
         try {
             statement = connection.prepareStatement(sql);
@@ -97,7 +98,7 @@ public class TaskDAO {
     }
 
     public boolean save(Task task) {
-        connection =  DBHelper.getConn();
+        connection = DBHelper.getConn();
         String sql = "insert into task(name,cpu_usage,disk_usage,memory_usage,network_usage,time_usage,create_time,complete_time,complete,computer_id,computer_name,status,started,started_time,waited,over_time) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";    //使用?做占位符
         try {
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -142,7 +143,7 @@ public class TaskDAO {
 
     public Task selectOne(int id) {
         Task task = null;
-        connection =  DBHelper.getConn();
+        connection = DBHelper.getConn();
         String sql = "select * from task where id=?";
         try {
             statement = connection.prepareStatement(sql);
@@ -183,7 +184,7 @@ public class TaskDAO {
     }
 
     public Boolean update(Task task) {
-        connection =  DBHelper.getConn();
+        connection = DBHelper.getConn();
         String sql = "update task set name=?,cpu_usage=?,disk_usage=?,memory_usage=?,network_usage=?,time_usage=?,complete_time=?,complete=?,computer_id=?,computer_name=?,status=?,started=?,started_time=?,waited=?,over_time=? where id =? ";    //使用?做占位符
         try {
             statement = connection.prepareStatement(sql);
@@ -219,19 +220,20 @@ public class TaskDAO {
         }
         return false;
     }
+
     public boolean delete(int id) {
-        connection =  DBHelper.getConn();
-        String sql ="delete from task where id=?";
+        connection = DBHelper.getConn();
+        String sql = "delete from task where id=?";
         try {
-            statement=connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql);
             statement.setInt(1, id);
-            int rs=statement.executeUpdate();
-            if(rs>0){
+            int rs = statement.executeUpdate();
+            if (rs > 0) {
                 return true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 statement.close();
                 connection.close();
@@ -242,4 +244,21 @@ public class TaskDAO {
         return false;
     }
 
+    public void deleteCompleted() {
+        connection = DBHelper.getConn();
+        String sql = "delete from task where complete=1";
+        try {
+            statement = connection.prepareStatement(sql);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

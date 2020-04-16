@@ -12,6 +12,5 @@ public class TaskTimer extends TimerTask {
         String time = format0.format(new Date().getTime());//这个就是把时间戳经过处理得到期望格式的时
         System.out.println("timer to check task now is " + time);
         TaskUtil.checkTaskIsOver();
-
     }
 }

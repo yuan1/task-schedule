@@ -3,10 +3,7 @@ package dao;
 import entity.Computer;
 import util.DBHelper;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +51,7 @@ public class ComputerDAO {
         connection =  DBHelper.getConn();
         String sql = "insert into computer(name,cpu,disk,memory,network,cpu_usage,disk_usage,memory_usage,network_usage) values(?,?,?,?,?,?,?,?,?) ";    //使用?做占位符
         try {
-            statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, computer.getName());    //为第1个?号赋值
             statement.setString(2, computer.getCpu());
             statement.setString(3, computer.getDisk());
@@ -65,6 +62,12 @@ public class ComputerDAO {
             statement.setLong(8, computer.getMemoryUsage());
             statement.setLong(9, computer.getNetworkUsage());
             int rs = statement.executeUpdate();    //执行并返回影响条数
+            //获取自增id
+            ResultSet resultSet = statement.getGeneratedKeys();
+            if (resultSet.next()) {
+                int id = resultSet.getInt(1);
+                computer.setId(id);
+            }
             if (rs > 0) {
                 return true;
             }
